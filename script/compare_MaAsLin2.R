@@ -53,7 +53,7 @@ print(opts)
 p_list = c("dplyr", "reshape2",  "readxl", "tibble",  "openxlsx",
            "foreach", "data.table",  "gridExtra", "scales", "ggplot2",  "ggh4x",
            "ggfortify", "ggvenn",  "ggrepel", "vegan", "pairwiseCI",  "vcd",
-            "igraph")
+            "igraph", "sampling")
 for(p in p_list){if (!requireNamespace(p)){install.packages(p)}
   library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)}
 

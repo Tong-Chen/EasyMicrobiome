@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-# Copyright 2024 De-feng Bai <baidefeng@caas.cn>
+# Copyright 2024-2026 De-feng Bai <baidefeng@caas.cn>
 
 # If used this script, please cited:
-# Yong-Xin Liu, Yuan Qin, Tong Chen, Meiping Lu, Xubo Qian, Xiaoxuan Guo, et al. 2021. A practical guide to amplicon and metagenomic analysis of microbiome data. Protein & Cell 12: 315-330. https://doi.org/10.1007/s13238-020-00724-8
+# 使用此脚本，请引用下文： Bai, Defeng, Tong Chen, ..., Yong‐Xin Liu**. 2025. “EasyMetagenome: A User‐Friendly and Flexible Pipeline for Shotgun Metagenomic Analysis in Microbiome Research.” iMeta 4: e70001. https://doi.org/10.1002/imt2.70001(Highly Cited)
 
 # 手动运行脚本，使用 Ctrl+Shift+H 或 Session 需要设置工作目录
 # Set Work Directory - Choose Directory / To Source File Location
@@ -32,11 +32,11 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 # 解析参数-h显示帮助信息
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--input"), type="character", default="result12/metaphlan4/Species.txt",
+    make_option(c("-i", "--input"), type="character", default="metaphlan4/Species.txt",
                 help="Unfiltered OTU table [default %default]"),
-    make_option(c("-g", "--metadata"), type="character", default="result12/metadata.txt",
+    make_option(c("-g", "--metadata"), type="character", default="metadata.txt",
                 help="metadata file or metadata [default %default]"),
-    make_option(c("-o", "--output"), type="character", default="result12/metaphlan4/",
+    make_option(c("-o", "--output"), type="character", default="metaphlan4/",
                 help="Output quantile value for filter feature table [default %default]") 
   )
   opts = parse_args(OptionParser(option_list=option_list))
@@ -44,22 +44,49 @@ if (TRUE){
 print("You are using the following parameters:")
 print(opts)
 
-# Version 1.0, Based on ASV table and taxonomy, output well info (purity, counts and taxonomy) and candidate wells of non-redundancy ASV
-# 版本 1.0, 基于ASV表和7级物种注释文件，输出每个孔的信息，筛选每个孔的信息()，以及非冗余ASV的修行孔，纯度优先，数据量其次排序的Top 5
+# Version 1.0
+# 版本 1.0
 
 
 # Install related packages
 # 基于CRAN安装R包，检测没有则安装 Installing R packages based on CRAN and installing them if they are not detected
-p_list = c("dplyr", "reshape2",  "readxl", "phyloseq", "tibble",  "openxlsx",
+p_list = c("dplyr", "reshape2",  "readxl", "tibble",  "openxlsx",
            "foreach", "data.table",  "gridExtra", "scales", "ggplot2",  "ggh4x",
            "ggfortify", "ggvenn",  "ggrepel", "vegan", "pairwiseCI",  "vcd",
-           "ANCOMBC", "Maaslin2",  "igraph")
+            "igraph")
 for(p in p_list){if (!requireNamespace(p)){install.packages(p)}
   library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)}
 
 #### LOAD REQUIRED R PACKAGES ####
-suppress <- function(x){invisible(capture.output(suppressMessages(suppressWarnings(x))))}
 
+# options(BioC_mirror="https://mirrors.tuna.tsinghua.edu.cn/bioconductor")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager", repos = site)
+a = rownames(installed.packages())
+
+# install CRAN
+install_CRAN <- c("ggplot2", "reshape2", "readxl", "tibble","openxlsx", "foreach", 
+                  "data.table", "gridExtra","scales", "ggh4x", "ggfortify", "ggvenn",
+                  "ggrepel", "vegan", "pairwiseCI", "vcd", "igraph")
+for (i in install_CRAN) {
+  if (!i %in% a)
+  install.packages(i, repos = site)
+}
+
+# install bioconductor
+install_bioc <- c( "phyloseq", "ANCOMBC", "Maaslin2")
+for (i in install_bioc) {
+  if (!i %in% a)
+    BiocManager::install(i, update = F) # , site_repository=site
+    a = rownames(installed.packages())
+}
+
+# install github
+if (!"amplicon" %in% a){
+  devtools::install_github("microbiota/amplicon")
+}
+
+suppress <- function(x){invisible(capture.output(suppressMessages(suppressWarnings(x))))}
 suppress(library(dplyr))
 suppress(library(reshape2))
 suppress(library(readxl))

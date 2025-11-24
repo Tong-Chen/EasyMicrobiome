@@ -47,8 +47,8 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 # 解析参数-h显示帮助细腻些
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--input"), type="character", default="result12/metaphlan4/taxonomy.tsv", help="Metaphlan4 relative abundance [default %default]"),
-    make_option(c("-g", "--metadata"), type="character", default="result12/metadata.txt", help="Metaphlan4 [default %default]"),
+    make_option(c("-i", "--input"), type="character", default="metaphlan4/taxonomy2.tsv", help="Metaphlan4 relative abundance [default %default]"),
+    make_option(c("-g", "--metadata"), type="character", default="metadata.txt", help="Metaphlan4 [default %default]"),
     make_option(c("-t", "--taxonomy"), type="numeric", default="7", help="Taxonomy level [default %default]"),
     make_option(c("-m", "--method"), type="character", default="bray", help="Distance method [default %default]"),
     make_option(c("-o", "--output"), type="character", default="", help="Output Metaphlan4 beta diversity filename [default %default]")
@@ -87,6 +87,8 @@ for(p in package_list){
 # 读取metaphlan4 taxonomy.tsv文件
 # 默认的quote会跳过2/3的数据，导致行减少产生NA，改默认值为空
 taxonomy = read.table(opts$input, header=T, sep="\t", quote = "", row.names=NULL, comment.char="")
+# 去掉列名中的 "_1_metaphlan"
+colnames(taxonomy) <- gsub("_1_metaphlan$", "", colnames(taxonomy))
 print(paste0("All taxonomy annotations are ", dim(taxonomy)[1], " lines!"))
 # 去除NA，否则无法计算
 taxonomy = na.omit(taxonomy)
@@ -152,8 +154,22 @@ colnames(level.reset)[2] = 'Group2'
 
 rownames(level.reset) = level.reset[,1]
 
-level_distance = vegdist(level.reset[,-c(1:8)], method = opts$method)  #Get β diversity distance matrix, default method was "bray"
+# 找到第一个以 "s__" 开头的列号
+first_s_col <- which(startsWith(colnames(level.reset), "s__"))[1]
+# 使用该列号之前的列作为要删掉的列
+level_distance <- vegdist(
+  level.reset[ , -c(1:(first_s_col - 1)) ],
+  method = opts$method
+)
 level_distance = as.matrix(level_distance)
+level_distance = as.data.frame(level_distance)
+df_out <- cbind(RowID = rownames(level_distance), level_distance)
 
-#Export diversity table
-write.table(level_distance, file=paste(opts$output, "_",opts$method, ".txt", sep = ""), append = FALSE, sep="\t", quote=F, row.names=F, col.names=T)
+write.table(
+  df_out,
+  file = paste0(opts$output, "_", opts$method, ".txt"),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE,
+  col.names = TRUE
+)

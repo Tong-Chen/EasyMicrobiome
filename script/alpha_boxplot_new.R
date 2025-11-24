@@ -73,11 +73,11 @@ if (!"amplicon" %in% a){
 # 解析参数-h显示帮助信息
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--input"), type="character", default="result12/metaphlan4/alpha.txt",
+    make_option(c("-i", "--input"), type="character", default="metaphlan4/alpha2.txt",
                 help="Alpha diversity matrix [default %default]"),
     make_option(c("-a", "--alpha_index"), type="character", default="shannon",
                 help="Group name [default %default]"),
-    make_option(c("-d", "--design"), type="character", default="result12/metadata.txt",
+    make_option(c("-d", "--design"), type="character", default="metadata2.txt",
                 help="Design file or metadata [default %default]"),
     make_option(c("-t", "--transpose"), type="logical", default=FALSE,
                 help="Design file or metadata [default %default]"),
@@ -85,7 +85,7 @@ if (TRUE){
                 help="Group name [default %default]"),
     make_option(c("-s", "--scale"), type="logical", default=FALSE,
                 help="Normalize to 100 [default %default]"),
-    make_option(c("-o", "--output"), type="character", default="result12/metaphlan4/",
+    make_option(c("-o", "--output"), type="character", default="metaphlan4/",
                 help="Output pdf directory, with prefix alpha_boxplot_; Stat in alpha_boxplot_TukeyHSD.txt [default %default]"),
     make_option(c("-x", "--xlabAngle"), type="logical", default=FALSE,
                 help="X lab set in angle [default %default]"),
@@ -170,11 +170,9 @@ alpha_boxplot2 <- function(alpha_div, metadata, index = "shannon", groupID = "gr
 
 
 # 2. 依赖关系检查、安装和加载
-
 suppressWarnings(suppressMessages(library(amplicon)))
 suppressWarnings(suppressMessages(library(scales)))
 suppressWarnings(suppressMessages(library(ggpubr)))
-suppressWarnings(suppressMessages(library(ggtern)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 
 mytheme = theme_bw() + theme(text = element_text(family = "sans", size = 8))+
@@ -212,7 +210,7 @@ if (opts$scale){
 # 读取实验设计
 metadata = read.table(opts$design, header=T, row.names=1, sep="\t", comment.char="", stringsAsFactors = F)
 
-p = alpha_boxplot2(alpha_div, metadata, index = opts$alpha_index, groupID = opts$group, levels = c("Cancer","Normal"))
+p = alpha_boxplot2(alpha_div, metadata, index = opts$alpha_index, groupID = opts$group, levels = unique(metadata[[opts$group]]))
 if (opts$xlabAngle){
   p = p + theme(axis.text.x=element_text(angle=45,vjust=1, hjust=1))
 }

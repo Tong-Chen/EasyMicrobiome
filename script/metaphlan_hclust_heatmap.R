@@ -1,10 +1,9 @@
 #!/usr/bin/env Rscript
 # 
-# Copyright 2016-2020 Yong-Xin Liu <metagenome@126.com>
+# Copyright 2016-2026 Yong-Xin Liu <metagenome@126.com>
 
 # If used this script, please cited:
-# Yong-Xin Liu, Yuan Qin, Tong Chen, Meiping Lu, Xubo Qian, Xiaoxuan Guo & Yang Bai. A practical guide to amplicon and metagenomic analysis of microbiome data. Protein Cell 41, 1-16, doi:10.1007/s13238-020-00724-8 (2020).
-# Jingying Zhang, Yong-Xin Liu, et. al. NRT1.1B is associated with root microbiota composition and nitrogen use in field-grown rice. Nature Biotechnology 37, 676-684, doi:10.1038/s41587-019-0104-4 (2019).
+# Bai, et al. 2025. EasyMetagenome: A User‐Friendly and Flexible Pipeline for Shotgun Metagenomic Analysis in Microbiome Research. iMeta 4: e70001. https://doi.org/10.1002/imt2.70001
 
 # 1. 分析前准备：帮助、参数、依赖包和读取文件
 
@@ -48,8 +47,8 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 # 此版本参数在windows中报错显示3，无法正常运行
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--input"), type="character", default="result/metaphlan2/taxonomy.spf", help="Metaphlan2 [default %default]"),
-    make_option(c("-t", "--taxonomy"), type="character", default="Species", help="Taxonomy level [default %default]"),
+    make_option(c("-i", "--input"), type="character", default="metaphlan4/taxonomy.spf", help="Metaphlan2 [default %default]"),
+    make_option(c("-t", "--taxonomy"), type="character", default="Genus", help="Taxonomy level [default %default]"),
     make_option(c("-n", "--TopN"), type="numeric", default="25", help="Number of taxonomy showing [default %default]"),
     make_option(c("-o", "--output"), type="character", default="", help="Output heatmap filename [default %default]"),
     make_option(c("-w", "--width"), type="numeric", default=183,
@@ -77,7 +76,7 @@ if (TRUE){
 
 # 1.3 安装CRAN来源常用包
 # 依赖包列表：参数解析、数据变换、绘图和开发包安装、安装依赖、ggplot主题
-package_list = c("pheatmap","ggplot2","dplyr")
+package_list = c("pheatmap","ggplot2","dplyr","stringr")
 # 判断R包加载是否成功来决定是否安装后再加载
 for(p in package_list){
   if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){
@@ -105,7 +104,14 @@ taxonomy = na.omit(taxonomy)
 ## 2.1 按指定组合并
 
 grp = taxonomy[, opts$taxonomy, drop=F]
-abu = taxonomy[,9:dim(taxonomy)[2]]
+
+# 判断metaphlan 8列 或kraken 7列，从第9或8列取
+n=9
+if (str_detect(opts$input,"kraken")) {
+  n=8
+}
+abu = taxonomy[,n:dim(taxonomy)[2]]
+
 merge = cbind(abu, grp)
 # group_by传变量，前面加".dots="
 mergeTax = merge %>% group_by(.dots=opts$taxonomy) %>% summarise_all(sum)

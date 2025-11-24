@@ -45,9 +45,9 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 # 解析参数-h显示帮助信息
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--input"), type="character", default="result12/metaphlan4/Phylum.txt",
+    make_option(c("-i", "--input"), type="character", default="metaphlan4/Phylum.txt",
                 help="Taxonomy composition [default %default]"),
-    make_option(c("-d", "--design"), type="character", default="result12/metadata.txt",
+    make_option(c("-d", "--design"), type="character", default="metadata.txt",
                 help="Design file or metadata [default %default]"),
     make_option(c("-n", "--group"), type="character", default="Group",
                 help="Group name [default %default]"),
@@ -130,9 +130,9 @@ data_all$group = gsub("[0-9]","", data_all$group)
 # 给分组排序
 # Sort for different groups
 levels(as.factor(data_all$group))
-data_all2 = data_all %>%
-  mutate(group = ordered(group,
-                         levels=c("C", "N")))
+
+data_all2 <- data_all %>%
+  mutate(group = factor(group, levels = unique(group)))
 
 
 # 根据样本数量确定每个分面的宽度，图例在顶部

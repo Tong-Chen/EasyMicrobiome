@@ -65,7 +65,7 @@ data_MWAS$species <- rownames(data_MWAS)
 data_species02 <- merge(data_species01, data_MWAS, by = "species")
 
 #devtools::install_github("BioSenior/ggvolcano", force = TRUE)
-library(ggVolcano)
+library(ggvolcano)
 data_vol <- data_species02
 data_vol = as.data.frame(data_vol)
 

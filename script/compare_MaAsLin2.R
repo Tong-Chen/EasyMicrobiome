@@ -53,7 +53,7 @@ print(opts)
 p_list = c("dplyr", "reshape2",  "readxl", "tibble",  "openxlsx",
            "foreach", "data.table",  "gridExtra", "scales", "ggplot2",  "ggh4x",
            "ggfortify", "ggvenn",  "ggrepel", "vegan", "pairwiseCI",  "vcd",
-            "igraph", "sampling")
+            "igraph", "sampling", "CVXR", "DescTools")
 for(p in p_list){if (!requireNamespace(p)){install.packages(p)}
   library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)}
 
@@ -105,6 +105,7 @@ suppress(library(ggrepel))
 suppress(library(vegan))
 suppress(library(pairwiseCI))
 suppress(library(vcd))
+# library(CVXR)
 suppress(library(ANCOMBC))
 suppress(library(Maaslin2))
 suppress(library(igraph))
@@ -135,8 +136,17 @@ ra.ps.s <- phyloseq(otu_table(as.matrix(ra.sub), taxa_are_rows=FALSE),
                                  check.names=FALSE, row.names=colnames(ra.sub)))))
 
 ## Group 
-sample_data(ra.ps.s)$Group <- dplyr::recode(sample_data(ra.ps.s)$Group, 
-                                                  `Cancer`=1, Normal=2)
+# sample_data(ra.ps.s)$Group <- dplyr::recode(sample_data(ra.ps.s)$Group, 
+#                                                   `Cancer`=1, Normal=2)
+
+# 获取 Group 列中不重复的分组
+groups <- unique(sample_data(ra.ps.s)$Group)
+
+# 使用 recode 将分组自动映射为 1, 2, ...
+sample_data(ra.ps.s)$Group <- dplyr::recode(
+  sample_data(ra.ps.s)$Group,
+  !!!setNames(seq_along(groups), groups)
+)
 
 # lm.s.npc
 library(phyloseq)

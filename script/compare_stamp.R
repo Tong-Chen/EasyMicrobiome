@@ -50,19 +50,19 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 if (TRUE){
     option_list=list(
         # 原始OTU表counts值
-        make_option(c("-i", "--input"), type="character", default="result/tax/sum_g2.txt", # otutab.txt stamp/tax_6Genus.txt
+        make_option(c("-i", "--input"), type="character", default="metaphlan4/Genus.txt", # otutab.txt stamp/tax_6Genus.txt
                     help="OTU table in counts;  [default %default]"),
         # 元数据/实验设计文件
-        make_option(c("-d", "--metadata"), type="character", default="result/metadata.txt",
+        make_option(c("-d", "--metadata"), type="character", default="metadata.txt",
                     help="metadata file;  [default %default]"),
         # 分组列名     
         make_option(c("-n", "--group"), type="character", default="Group",
                     help="Group name;  [default %default]"),
         # 组间比较
-        make_option(c("-c", "--compare"), type="character", default="feces-plaque",
+        make_option(c("-c", "--compare"), type="character", default="Centenarians-Young",
                     help="Groups comparison;  [default %default]"),
         # 组间比较方法
-        make_option(c("-m", "--method"), type="character", default="t.test",
+        make_option(c("-m", "--method"), type="character", default="wilcox.test",
                     help="Compare method, default t.test, alternative wilcox [default %default]"),
         # 显著性阈值
         make_option(c("-p", "--pvalue"), type="numeric", default=0.05,
@@ -71,10 +71,10 @@ if (TRUE){
         make_option(c("-f", "--fdr"), type="character", default="none",
                     help="adjust methods: holm, hochberg, hommel, bonferroni, BH, BY, fdr, none [default %default]"),
         # 相对丰度，默认千一
-        make_option(c("-t", "--threshold"), type="numeric", default=0.1,
+        make_option(c("-t", "--threshold"), type="numeric", default=0.01,
                     help="Relative abundance,  [default %default]"),
         # holm, hochberg, hommel, bonferroni, BH, BY, fdr, none
-        make_option(c("-o", "--output"), type="character", default="result/tax/",
+        make_option(c("-o", "--output"), type="character", default="metaphlan4/",
                     help="Output prefix; [default %default]"),
         # 图片宽mm
         make_option(c("-w", "--width"), type="numeric", default=128,
@@ -186,7 +186,7 @@ data1$Group <- as.factor(data1$Group)
 
 # diff1 <- data1 %>%
 #   select_if(is.numeric) %>%
-#   map_df(~ broom::tidy(wilcox.test(. ~ Group, data = data1, conf.int = TRUE, conf.level = 0.95)), 
+#   map_df(~ broom::tidy(wilcox.test(. ~ Group, data = data1, conf.int = TRUE, conf.level = 0.95)),
 #          .id = "var")
 
 diff1 <- data1 %>%
@@ -208,7 +208,7 @@ diff1 <- data1 %>%
 
 
 # 多重检验校正
-diff1$p.value <- p.adjust(diff1$p.value, method = "fdr")
+diff1$p.value <- p.adjust(diff1$p.value, method = opts$fdr)
 
 # 筛选显著结果
 diff1 <- diff1 %>% filter(p.value < opts$pvalue)

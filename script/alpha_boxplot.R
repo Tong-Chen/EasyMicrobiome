@@ -1,14 +1,15 @@
 #!/usr/bin/env Rscript
 
-# Copyright 2016-2021 Yong-Xin Liu <yxliu@genetics.ac.cn / metagenome@126.com>
+# Copyright 2016-2026 Yong-Xin Liu <liuyongxin@caas.cn / metagenome@126.com>
 
 # If used this script, please cited:
-# Yong-Xin Liu, Yuan Qin, Tong Chen, Meiping Lu, Xubo Qian, Xiaoxuan Guo, Yang Bai. A practical guide to amplicon and metagenomic analysis of microbiome data. Protein Cell 2021(12) 5:315-330 doi: 10.1007/s13238-020-00724-8
+# Bai, et al. 2025. EasyMetagenome: A User‐Friendly and Flexible Pipeline for Shotgun Metagenomic Analysis in Microbiome Research. iMeta 4: e70001. https://doi.org/10.1002/imt2.70001
 
 # 手动运行脚本请，需要设置工作目录，使用 Ctrl+Shift+H 或 Session - Set Work Directory - Choose Directory / To Source File Location 设置工作目录
 
 # 更新
 # 2021/5/31: 更新引文，添加数据表转置和标准化的选项
+# 2025/11/25: 更新引文，更新模板
 
 # 1.1 程序功能描述和主要步骤
 
@@ -37,25 +38,29 @@ options(warn = -1) # Turn off warning
 # 图片高"-e", "--height"，默认59 mm，根据图像布局可适当增大或缩小
 
 
-# 1.2 解析命令行
-# 设置清华源加速下载
+# 1.2 依赖包安装
+
 site="https://mirrors.tuna.tsinghua.edu.cn/CRAN"
-# 判断命令行解析是否安装，安装并加载
-if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))) {
-  install.packages(p, repos=site)
-  require("optparse",character.only=T)
+a = rownames(installed.packages())
+
+# install CRAN
+install_CRAN <- c("ggplot2", "BiocManager", "optparse")
+for (i in install_CRAN) {
+  if (!i %in% a)
+    install.packages(i, repos = site)
+    require(i,character.only=T)
+  a = rownames(installed.packages())
+}
+
+# install bioconductor
+install_bioc <- c("ggplot2", "multcompView")
+for (i in install_bioc) {
+  if (!i %in% a)
+    BiocManager::install(i, update = F)
+  a = rownames(installed.packages())
 }
 
 
-site = "https://mirrors.tuna.tsinghua.edu.cn/CRAN"
-
-options(BioC_mirror="https://mirrors.tuna.tsinghua.edu.cn/bioconductor")
-
-
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager", repos = site)
-
-a = rownames(installed.packages())
 
 install_bioc <- c("ggplot2", "multcompView")
 
@@ -65,11 +70,13 @@ for (i in install_bioc) {
     a = rownames(installed.packages())
 }
 
+# install github
 if (!"amplicon" %in% a){
   devtools::install_github("microbiota/amplicon")
 }
 
 
+# 1.3 解析命令行
 # 解析参数-h显示帮助信息
 if (TRUE){
   option_list = list(

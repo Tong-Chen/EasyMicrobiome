@@ -32,11 +32,11 @@ if (!suppressWarnings(suppressMessages(require("optparse", character.only = TRUE
 # 解析参数-h显示帮助信息
 if (TRUE){
   option_list = list(
-    make_option(c("-i", "--Correlation"), type="character", default="result12/metaphlan4/sxtr_cov_mat_Cancer.tsv",
+    make_option(c("-i", "--Correlation"), type="character", default="metaphlan4/sxtr_cov_mat_Centenarians.tsv",
                 help="Metaphlan4 species table"),
-    make_option(c("-P", "--Pvalue"), type="character", default="result12/metaphlan4/sxtr_pvals_cancer.two_sided.tsv",
+    make_option(c("-P", "--Pvalue"), type="character", default="metaphlan4/sxtr_pvals_Centenarians.two_sided.tsv",
                 help="Unfiltered OTU table [default %default]"),
-    make_option(c("-r", "--output"), type="character", default="result12/metaphlan4/",
+    make_option(c("-r", "--output"), type="character", default="metaphlan4/",
                 help="Output file for SparCC analysis in different groups  [default %default]") 
   )
   opts = parse_args(OptionParser(option_list=option_list))
@@ -112,7 +112,7 @@ patients.clusters <- cluster_louvain(graph)
 V(graph)$Cluster <- patients.clusters$membership
 
 # save data
-write_graph(graph, file = paste(opts$output, "Cancer_01.graphml", sep=""), format="graphml")
+write_graph(graph, file = paste(opts$output, "Centenarians_01.graphml", sep=""), format="graphml")
 
 # 可视化方式1：基于Gephi软件进行可视化 https://gephi.org/
 # Visualized in Gephi software
@@ -136,7 +136,9 @@ layout5 <- layout_with_graphopt(g)
 color = c("#d2da93","#5196d5","#00ceff","#ff630d","#35978b",
           "#e5acd7","#77aecd","#ec8181","#dfc6a5","#e50719",
           "#d27e43","#8a4984","#fe5094","#8d342e","#f94e54",
-          "#ffad00","#36999d","#00fc8d","#b64aa0","#9b82e1")
+          "#ffad00","#36999d","#00fc8d","#b64aa0","#9b82e1",
+          "#fec44f","#e0f3db","#fa9fb5","#c994c7","#807dba",
+          "#ec7014","#a6bddb","#ef3b2c","#fe9929","#a1d99b")
 
 names(color) <- unique(V(g)$Cluster) 
 V(g)$point.col <- color[match(V(g)$Cluster,names(color))] 
@@ -145,7 +147,7 @@ V(g)$point.col <- color[match(V(g)$Cluster,names(color))]
 # The edge color is set according to the positive or negative correlation
 E(g)$color <- ifelse(E(g)$linecolor == "positive","#ff878c","#5ea6c2")
 
-pdf(file=paste(opts$output, "network_group_Cancer_cluster6.pdf", sep=""), width=10, height=12)
+pdf(file=paste(opts$output, "network_group_Centenarians_cluster.pdf", sep=""), width=10, height=12)
 par(mar=c(5,2,1,2))
 plot.igraph(g, layout=layout5,
             vertex.color=V(g)$point.col,

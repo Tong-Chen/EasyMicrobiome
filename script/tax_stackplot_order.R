@@ -53,7 +53,7 @@ if (TRUE){
                 help="Group name [default %default]"),
     make_option(c("-o", "--output"), type="character", default="",
                 help="Output directory; name according to input [default %default]"),
-    make_option(c("-l", "--legend"), type="numeric", default=12,
+    make_option(c("-l", "--legend"), type="numeric", default=6,
                 help="Legend number [default %default]"),
     make_option(c("-c", "--color"), type="character", default="Paired",
                 help="color ggplot, manual1, Paired or Set3 [default %default]"),
@@ -122,10 +122,26 @@ mean_sort3 = as.data.frame(mean_sort3)
 # Add taxonomy
 # 加入微生物分类信息
 mean_sort3$tax = rownames(mean_sort3)
-data_all = as.data.frame(melt(mean_sort3, id.vars = c("tax")))
+data_all = as.data.frame(reshape2::melt(mean_sort3, id.vars = c("tax")))
 data_all$group = data_all$variable
 data_all$group = as.character(data_all$group)
 data_all$group = gsub("[0-9]","", data_all$group)
+
+# 从 metadata 建立映射表：首字母（大写） -> 完整组名（取第一个匹配）
+map <- metadata %>%
+  mutate(prefix = toupper(substr(Group, 1, 1))) %>%
+  # 若同一首字母有多个完整组，默认保留第一个；如需其它策略可改这里
+  group_by(prefix) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(prefix, full_group = Group)
+
+# 将 data_all 的 group 首字母转换并左连接映射表，然后用完整名替换（若找不到则保留原值）
+data_all <- data_all %>%
+  mutate(prefix = toupper(substr(group, 1, 1))) %>%
+  left_join(map, by = "prefix") %>%
+  mutate(group = if_else(!is.na(full_group), full_group, group)) %>%
+  select(-prefix, -full_group)
 
 # 给分组排序
 # Sort for different groups
